@@ -20,8 +20,10 @@ class Lib(object):
             self.findbytitle()
         elif num == '2':
             print("author")
+            self.findbyauthor()
         elif num == '3':
             print("type")
+            self.printtype()
         elif num == '0':
             sys.exit(0)
         else:
@@ -45,20 +47,41 @@ class Lib(object):
         title = '《' + input() + '》'
         con.append(title)
         result = self.__c.execute("select * from mainstorage where title = ?;", con)
-        judge = self.__c.execute("select * from mainstorage where title = 'laji';")
-        if result == judge:
-            print("no information about this title")
-        else:
+        x = 0
+        for i in result:
+            x = 1
+        result = self.__c.execute("select * from mainstorage where title = ?;", con)
+        if x == 1:
             for inf in result:
+                print(1)
                 print("title :" + inf[0] + '\n',
                       "author :" + inf[1] + '\n',
                       "type :" + inf[2] + '\n',
                       "introduction :" + inf[3] + '\n'
                       )
-        self.continue_use()
+            self.continue_use()
+        else:
+            print("no such title in the mainstorage \n back to the main interface")
+            self.continue_use()
+
+    def findbyauthor(self):
+        print("input the author")
+        con = [input()]
+        result = self.__c.execute("select title, type from mainstorage where author = ?;", con)
+        x = 0
+        for i in result:
+            x = 1
+        result = self.__c.execute("select title, type from mainstorage where author = ?;", con)
+        if x == 1:
+            for inf in result:
+                print("title :", inf[0], '\n'
+                      "type :", inf[1], '\n')
+            self.continue_use()
+        else:
+            print("no suach author \n back to the main interface")
+            self.continue_use()
 
 
 test = Lib(cursor)
 test.ui()
-
 
