@@ -81,6 +81,9 @@ class Lib(object):
             print("no suach author \n back to the main interface")
             self.continue_use()
 
+    def findbytype(self):
+        pass
+
 
 test = Lib(cursor)
 test.ui()
