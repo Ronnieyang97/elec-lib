@@ -6,8 +6,9 @@ cursor = connection.cursor()
 
 
 class Lib(object):
-    def __init__(self, c):
-        self.__c = c
+    def __init__(self, connect):
+        self.__connection = connect
+        self.__c = self.__connection.cursor()
 
     def ui(self):
         print("请输入要进行的操作序号：\n",
@@ -22,10 +23,11 @@ class Lib(object):
         elif num == '2':
             self.ui_insert()
         elif num == '3':
-            pass
+            self.ui_update()
         elif num == '4':
             pass
         elif num == '0':
+            self.__connection.commit()
             sys.exit()
         else:
             print("请输入正确的指令！")
@@ -47,12 +49,51 @@ class Lib(object):
             booktype = input()
             print("请输入简介")
             introduction = input()
+            title = "《" + title + "》"
             self.__c.execute("insert into mainstorage (title, author, type, introduction) values(?,?,?,?)",
                              [title, author, booktype, introduction])
         print("insert over，back to the main interface")
         self.ui()
 
-
+    def ui_update(self):
+        print("请输入需要更新信息的title(退出请输入0)")   #必须为准确的书名
+        title = input()
+        if title == '0':
+            self.ui()
+        title = "《" + title + "》"
+        print("请输入需要更改的对象（title/author/type/introduction）")
+        target = input()
+        if target != "title" and target != "author" and target != "type" and target != "introduction":
+            print("输入无效！")
+            self.ui_update()
+        print("请输入更新的内容")
+        content = input()
+        if target == "title":
+            content = "《" + content + "》"
+        result = self.__c.execute("select ? from mainstorage where title = ?", [target, title])
+        x = 0                   #查看输入的title是否存在于database中
+        for i in result:
+            x = 1
+        if x == 0:
+            print("title is not in the storage，insert please")
+            self.ui_insert()
+        elif x == 1:
+            result = self.__c.execute("select ? from mainstorage where title = ?", [target, title])
+            for inf in result:
+                print("将" + title + "中的" + inf[0] + "改为" + content + "(yes/no)")
+            judge = input()
+            if judge == "no":
+                print("cancel the update,back to the main interface")
+            elif judge == "yes":
+                self.__c.execute("update mianstorage set ? = ? where title = ?", [target, content, title])
+                result = self.__c.execute("select * from mainstorage where title = ?", [title])
+                for i in result:
+                    print(i)
+                print("update over,back to the main interface")
+                self.ui()
+            else:
+                print("输入无效！！！")
+                self.ui_update()
 
     def ui_find(self):      #查找界面
         print("请输入要进行的操作序号：\n",
@@ -76,17 +117,6 @@ class Lib(object):
             print("useless input")
             self.ui_find()
 
-    def continue_use(self):         #交互：是否继续使用
-        print("是否继续使用？(yes/no)")
-        command = input()
-        if command == 'yes':
-            self.ui_find()
-        elif command == 'no':
-            sys.exit(0)
-        else:
-            print("请输入正确的指令")
-            self.continue_use()
-
     def findbytitle(self):              #按照书名查找
         print("input the title")
         con = ["%" + input() + "%"]      #对输入加%后，转为模糊搜索格式
@@ -102,7 +132,7 @@ class Lib(object):
                       "type :" + inf[2] + '\n',
                       "introduction :" + inf[3] + '\n'
                       )
-            self.continue_use()
+            self.ui_find()
         else:       #查询结果为空，返回主界面
             print("no such title in the mainstorage \n back to the finding interface")
             self.ui_find()
@@ -120,7 +150,7 @@ class Lib(object):
                 print("title :", inf[0], '\n'
                       "author :", inf[1], '\n'
                       "type :", inf[2], '\n')
-            self.continue_use()
+            self.ui_find()
         else:           #查询结果为空，询问是否返回主界面
             print("no such author \n back to the finding interface")
             self.ui_find()
@@ -147,22 +177,28 @@ class Lib(object):
                 print("title :", inf[0], '\n'
                       "author :", inf[1], '\n'
                       "type :", inf[2], '\n')
-            self.continue_use()
+            self.ui_find()
         else:
             print("no such type \n back to the finding interface")
             self.ui_find()
 
 
-test = Lib(cursor)
+test = Lib(connection)
 test.ui()
-connection.commit()
-'''title = "shuming"
-author = "zuozhe"
-booktype = "leixing"
-introduction = "jianjie"
-cursor.execute("insert into mainstorage (title,author,type,introduction) values(?,?,?,?)", [title,author,booktype,introduction])
-result = cursor.execute("select * from mainstorage where title = 'shuming'")
-for i in result:
-    print(i)'''
 
-
+'''title = "《shuming》"
+target = "author"
+content = "zuozhe"
+result = cursor.execute("select ? from mainstorage where title = ?", [target, title])
+for inf in result:
+    print(inf)
+    print("将" + title + "中的" + inf[0] + "改为" + content + "(yes/no)")'''
+'''judge = "yes"
+if judge == "no":
+    print("cancel the update,back to the main interface")
+elif judge == "yes":
+    cursor.execute("update mianstorage set ? = ? where title = ?", [target, content, title])
+    result = cursor.execute("select * from mainstorage where title = ?", [title])
+    for i in result:
+        print(i)
+    print("update over,back to the main interface")'''
