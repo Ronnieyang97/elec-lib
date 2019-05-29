@@ -21,7 +21,7 @@ class Lib(object):
         elif num == '2':    #功能2按照作者查找
             print("author")
             self.findbyauthor()
-        elif num == '3':
+        elif num == '3':        #功能3按照类型查找
             print("type")
             self.findbytype()
         elif num == '0':
@@ -93,11 +93,11 @@ class Lib(object):
             i += 1
         print("请输入想要查询的种类")
         con = [input()]  #将输入转为list
-        result = self.__c.execute("select title, author from mianstorage where type = ?", con)
+        result = self.__c.execute("select title, author from mainstorage where type = ?", con)
         x = 0
         for i in result:
             x = 1
-        result = self.__c.execute("select title, author from mianstorage where type = ?", con)
+        result = self.__c.execute("select title, author from mainstorage where type = ?", con)
         if x == 1:
             for inf in result:
                 print("title :", inf[0], '\n'
@@ -106,7 +106,7 @@ class Lib(object):
         else:
             print("no such type \n back to the main interface")
             self.continue_use()
-        
+
 
 
 
