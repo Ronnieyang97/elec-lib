@@ -85,10 +85,14 @@ class Lib(object):
             if judge == "no":
                 print("cancel the update,back to the main interface")
             elif judge == "yes":
-                self.__c.execute("update mianstorage set ? = ? where title = ?", [target, content, title])
-                result = self.__c.execute("select * from mainstorage where title = ?", [title])
-                for i in result:
-                    print(i)
+                if target == "title":
+                    self.__c.execute("update mainstorage set title = ? where title = ?", [content, title])
+                elif target == "author":
+                    self.__c.execute("update mainstorage set author = ? where title = ?", [content, title])
+                elif target  == "type":
+                    self.__c.execute("update mainstorage set type = ? where title = ?", [content, title])
+                elif target == "introduction":
+                    self.__c.execute("update mainstorage set introduction = ? where title = ?", [content, title])
                 print("update over,back to the main interface")
                 self.ui()
             else:
@@ -185,20 +189,3 @@ class Lib(object):
 
 test = Lib(connection)
 test.ui()
-
-'''title = "《shuming》"
-target = "author"
-content = "zuozhe"
-result = cursor.execute("select ? from mainstorage where title = ?", [target, title])
-for inf in result:
-    print(inf)
-    print("将" + title + "中的" + inf[0] + "改为" + content + "(yes/no)")'''
-'''judge = "yes"
-if judge == "no":
-    print("cancel the update,back to the main interface")
-elif judge == "yes":
-    cursor.execute("update mianstorage set ? = ? where title = ?", [target, content, title])
-    result = cursor.execute("select * from mainstorage where title = ?", [title])
-    for i in result:
-        print(i)
-    print("update over,back to the main interface")'''
