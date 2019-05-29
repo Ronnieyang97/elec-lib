@@ -25,7 +25,7 @@ class Lib(object):
         elif num == '3':
             self.ui_update()
         elif num == '4':
-            pass
+            self.ui_delete()
         elif num == '0':
             self.__connection.commit()
             sys.exit()
@@ -33,6 +33,38 @@ class Lib(object):
             print("请输入正确的指令！")
             self.ui()
         pass
+
+    def ui_delete(self):
+        print("请输入想要删除条目的title(输入0退出)")
+        target = input()
+        if target == '0':
+            self.ui()
+        target = ["《" + target + "》"]
+        result = self.__c.execute("select * from mainstorage where title = ?", target)
+        x = 0
+        for i in result:
+            x = 1
+        if x == 0:
+            print("no such title,back to the main interface")
+            self.ui()
+        elif x == 1:
+            result = self.__c.execute("select * from mainstorage where title = ?", target)
+            for inf in result:
+                print("是否确定删除以下信息？(yes/no)\n",
+                      "title :", inf[0], '\n',
+                      "author :", inf[1], '\n',
+                      "type :", inf[2], '\n',
+                      "introduction :", inf[3], '\n')
+                judge = input()
+                if judge == "no":
+                    self.ui_delete()
+                elif judge == "yes":
+                    self.__c.execute("delete from mainstorage where title = ?", target)
+                    print("delete over,back to the main interface")
+                    self.ui()
+                else:
+                    print("无效输入！！！")
+                    self.ui()
 
     def ui_insert(self):
         print("请输入title（退出输入0）")        #sqlite中title为主键因此不能为空
@@ -77,19 +109,20 @@ class Lib(object):
         if x == 0:
             print("title is not in the storage，insert please")
             self.ui_insert()
-        elif x == 1:
+        elif x == 1:        #根据target的值来对相应的列做出update
             result = self.__c.execute("select ? from mainstorage where title = ?", [target, title])
             for inf in result:
                 print("将" + title + "中的" + inf[0] + "改为" + content + "(yes/no)")
             judge = input()
             if judge == "no":
                 print("cancel the update,back to the main interface")
+                self.ui_update()
             elif judge == "yes":
                 if target == "title":
                     self.__c.execute("update mainstorage set title = ? where title = ?", [content, title])
                 elif target == "author":
                     self.__c.execute("update mainstorage set author = ? where title = ?", [content, title])
-                elif target  == "type":
+                elif target == "type":
                     self.__c.execute("update mainstorage set type = ? where title = ?", [content, title])
                 elif target == "introduction":
                     self.__c.execute("update mainstorage set introduction = ? where title = ?", [content, title])
