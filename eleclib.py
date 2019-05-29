@@ -9,7 +9,7 @@ class Lib(object):
     def __init__(self, c):
         self.__c = c
 
-    def ui(self):
+    def ui_find(self):      #查找界面
         print("请输入需要的服务序号",
               "1：按书名查找",
               "2：按作者查找",
@@ -23,18 +23,18 @@ class Lib(object):
             self.findbyauthor()
         elif num == '3':
             print("type")
-            self.printtype()
+            self.findbytype()
         elif num == '0':
             sys.exit(0)
         else:
             print("useless input")
-            self.ui()
+            self.ui_find()
 
     def continue_use(self):         #交互：是否继续使用
         print("是否继续使用？(yes/no)")
         command = input()
         if command == 'yes':
-            self.ui()
+            self.ui_find()
         elif command == 'no':
             sys.exit(0)
         else:
@@ -78,13 +78,38 @@ class Lib(object):
                       "type :", inf[1], '\n')
             self.continue_use()
         else:           #查询结果为空，询问是否返回主界面
-            print("no suach author \n back to the main interface")
+            print("no such author \n back to the main interface")
             self.continue_use()
 
     def findbytype(self):
-        pass
+        alltype = self.__c.execute("select type from mainstorage group by type having count(type) > 1")
+        print("we have types like:")
+        i = 0
+        for x in alltype:       #显示所有type
+            if i % 5 == 0:
+                print(x[0])
+            else:
+                print(x[0], end="     ")
+            i += 1
+        print("请输入想要查询的种类")
+        con = [input()]  #将输入转为list
+        result = self.__c.execute("select title, author from mianstorage where type = ?", con)
+        x = 0
+        for i in result:
+            x = 1
+        result = self.__c.execute("select title, author from mianstorage where type = ?", con)
+        if x == 1:
+            for inf in result:
+                print("title :", inf[0], '\n'
+                      "type :", inf[1], '\n')
+            self.continue_use()
+        else:
+            print("no such type \n back to the main interface")
+            self.continue_use()
+        
+
 
 
 test = Lib(cursor)
-test.ui()
+test.ui_find()
 
