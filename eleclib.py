@@ -9,11 +9,57 @@ class Lib(object):
     def __init__(self, c):
         self.__c = c
 
+    def ui(self):
+        print("请输入要进行的操作序号：\n",
+              "1、查询\n",
+              "2、新建\n",
+              "3、更改\n",
+              "4、删除\n",
+              "0、退出程序")
+        num = input()
+        if num == '1':
+            self.ui_find()
+        elif num == '2':
+            self.ui_insert()
+        elif num == '3':
+            pass
+        elif num == '4':
+            pass
+        elif num == '0':
+            sys.exit()
+        else:
+            print("请输入正确的指令！")
+            self.ui()
+        pass
+
+    def ui_insert(self):
+        print("请输入title（退出输入0）")        #sqlite中title为主键因此不能为空
+        title = input()
+        if title == '' or title[0] == ' ':
+            print("title不能为空！！！")
+            self.ui_insert()
+        elif title == '0':
+            self.ui()
+        else:
+            print("请输入作者")
+            author = input()
+            print("请输入类型")
+            booktype = input()
+            print("请输入简介")
+            introduction = input()
+            self.__c.execute("insert into mainstorage (title, author, type, introduction) values(?,?,?,?)",
+                             [title, author, booktype, introduction])
+        print("insert over，back to the main interface")
+        self.ui()
+
+
+
     def ui_find(self):      #查找界面
-        print("请输入需要的服务序号",
-              "1：按书名查找",
-              "2：按作者查找",
-              "3：按类型查找",
+        print("请输入要进行的操作序号：\n",
+              "1：按书名查找\n",
+              "2：按作者查找\n",
+              "3：按类型查找\n",
+              "9：返回主界面\n",
               "0: 退出程序")
         num = input()
         if num == '1':   #功能1按照书名查找
@@ -22,6 +68,8 @@ class Lib(object):
             self.findbyauthor()
         elif num == '3':        #功能3按照类型查找
             self.findbytype()
+        elif num == '9':        #返回上一界面
+            self.ui()
         elif num == '0':
             sys.exit(0)
         else:
@@ -42,11 +90,11 @@ class Lib(object):
     def findbytitle(self):              #按照书名查找
         print("input the title")
         con = ["%" + input() + "%"]      #对输入加%后，转为模糊搜索格式
-        result = self.__c.execute("select * from mainstorage where title like ?;", con)   #sqlite查询
+        result = self.__c.execute("select * from mainstorage where title like ?", con)   #sqlite查询
         x = 0
         for i in result:        #sqlite如果返回为空，则i为0，将显示无此项并提供返回主界面的询问；如果不为空则进入显示结果
             x = 1
-        result = self.__c.execute("select * from mainstorage where title like ?;", con)
+        result = self.__c.execute("select * from mainstorage where title like ?", con)
         if x == 1:          #查询结果不为空，显示结果
             for inf in result:
                 print("title :" + inf[0] + '\n',
@@ -56,17 +104,17 @@ class Lib(object):
                       )
             self.continue_use()
         else:       #查询结果为空，返回主界面
-            print("no such title in the mainstorage \n back to the main interface")
-            self.continue_use()
+            print("no such title in the mainstorage \n back to the finding interface")
+            self.ui_find()
 
     def findbyauthor(self):
         print("input the author")
         con = ["%" + input() + "%"]     #将输入转为list
-        result = self.__c.execute("select title, author, type from mainstorage where author like ?;", con)
+        result = self.__c.execute("select title, author, type from mainstorage where author like ?", con)
         x = 0
         for i in result:        #查询结果为空则为0，显示无此信息并询问是否返回主界面，否则为1，显示结果
             x = 1
-        result = self.__c.execute("select title, author, type from mainstorage where author like ?;", con)
+        result = self.__c.execute("select title, author, type from mainstorage where author like ?", con)
         if x == 1:              #查询结果不为空，循环显示所有结果
             for inf in result:
                 print("title :", inf[0], '\n'
@@ -74,11 +122,11 @@ class Lib(object):
                       "type :", inf[2], '\n')
             self.continue_use()
         else:           #查询结果为空，询问是否返回主界面
-            print("no such author \n back to the main interface")
-            self.continue_use()
+            print("no such author \n back to the finding interface")
+            self.ui_find()
 
     def findbytype(self):
-        alltype = self.__c.execute("select type from mainstorage group by type having count(type) > 1;")
+        alltype = self.__c.execute("select type from mainstorage group by type having count(type) > 1")
         print("we have types like:")
         i = 0
         for x in alltype:       #显示所有type
@@ -89,11 +137,11 @@ class Lib(object):
             i += 1
         print("请输入想要查询的种类")
         con = ["%" + input() + "%"]  #将输入转为list
-        result = self.__c.execute("select title, author, type from mainstorage where type like ?;", con)
+        result = self.__c.execute("select title, author, type from mainstorage where type like ?", con)
         x = 0
         for i in result:
             x = 1
-        result = self.__c.execute("select title, author, type from mainstorage where type like ?;", con)
+        result = self.__c.execute("select title, author, type from mainstorage where type like ?", con)
         if x == 1:
             for inf in result:
                 print("title :", inf[0], '\n'
@@ -101,11 +149,20 @@ class Lib(object):
                       "type :", inf[2], '\n')
             self.continue_use()
         else:
-            print("no such type \n back to the main interface")
-            self.continue_use()
+            print("no such type \n back to the finding interface")
+            self.ui_find()
 
 
 test = Lib(cursor)
-test.ui_find()
+test.ui()
+connection.commit()
+'''title = "shuming"
+author = "zuozhe"
+booktype = "leixing"
+introduction = "jianjie"
+cursor.execute("insert into mainstorage (title,author,type,introduction) values(?,?,?,?)", [title,author,booktype,introduction])
+result = cursor.execute("select * from mainstorage where title = 'shuming'")
+for i in result:
+    print(i)'''
 
 
