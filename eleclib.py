@@ -14,7 +14,7 @@ class Lib(object):
 
     def ui(self):
         print("输入任意字符开始")
-        input()      #随意输入，起到暂停程序的作用
+        input()                 #随意输入，起到暂停程序的作用
         print("请输入要进行的操作序号：\n",
               "1、查询\n",
               "2、新建\n",
@@ -68,6 +68,7 @@ class Lib(object):
     def getpassage(self, url):          #从给到的url获取有效信息并添加到主书库中
         browser = webdriver.Chrome()
         browser.get(url)
+        browser.minimize_window()
         name = browser.find_element_by_id('activity-name')          #根据标题查找书目可能的类型
         alltype = ["书信集", "传记", "医学", "历史", "哲学", "悬疑小说", "心理", "散文集", "文学", "法律", "游记", "社科",
                    "科学", "科幻小说", "纪实", "经济", "绘画绘本", "职场", "艺术", "计算机", "诗歌", "随笔", "小说"]
@@ -122,6 +123,7 @@ class Lib(object):
         browser = webdriver.Chrome()
         try:
             browser.get(url)
+            browser.minimize_window()
         except InvalidArgumentException:
             print("来源错误，请重新确认")
             browser.quit()
@@ -188,6 +190,7 @@ class Lib(object):
         title = input()
         browser = webdriver.Chrome()
         browser.get('http://www.library.shmtu.edu.cn/')
+        browser.minimize_window()
         input1 = browser.find_element_by_id('q')
         input1.send_keys(title)
         button = browser.find_element_by_class_name("button")
