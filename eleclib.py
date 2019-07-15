@@ -2,6 +2,7 @@ import sqlite3
 import sys
 import os
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, InvalidArgumentException
 #database中有mainstorage; recyclebin; favourite; read四个sheet分别存储主书库，回收站，收藏夹和已读;
 #均包含title, author, type, introduction;
 
@@ -24,26 +25,29 @@ class Lib(object):
               "7、显示已读书目\n",
               "8、显示收藏夹书目\n",
               "9、在线查询\n",
+              "10、在线添加\n",
               "0、退出程序")
         num = input()
         if num == '1':
             self.ui_find()
         elif num == '2':
-            self.ui_insert()
+            self.insert()
         elif num == '3':
-            self.ui_update()
+            self.update()
         elif num == '4':
-            self.ui_delete()
+            self.delete()
         elif num == '5':
             self.ui_insert_read()
         elif num == '6':
             self.ui_insert_favourite()
         elif num == '7':
-            self.ui_print_read()
+            self.print_read()
         elif num == '8':
-            self.ui_print_favourite()
+            self.print_favourite()
         elif num == '9':
             self.ui_olsearch()
+        elif num == "10":
+            self.insert_online()
         elif num == '0':
             self._connection.commit()
             sys.exit()
@@ -51,6 +55,89 @@ class Lib(object):
             print("请输入正确的指令！")
             self.ui()
         pass
+
+    def insert_online(self):
+        self.check_connect()
+        print("请输入连接：（输入完后加一个空格，否则会直接打开网页）")             #暂时只能手动复制输入连接
+        url = input()
+        self.check_resource(url)
+        self.getpassage(url)
+        print("导入结束")
+        self.ui()
+
+    def getpassage(self, url):          #从给到的url获取有效信息并添加到主书库中
+        browser = webdriver.Chrome()
+        browser.get(url)
+        name = browser.find_element_by_id('activity-name')          #根据标题查找书目可能的类型
+        alltype = ["书信集", "传记", "医学", "历史", "哲学", "悬疑小说", "心理", "散文集", "文学", "法律", "游记", "社科",
+                   "科学", "科幻小说", "纪实", "经济", "绘画绘本", "职场", "艺术", "计算机", "诗歌", "随笔", "小说"]
+        for i in alltype:
+            if i in name.text:
+                booktype = i
+                break
+            else:
+                booktype = ' '
+        content = browser.find_element_by_id("js_content")          #查找正文
+        start = content.text.index("01")  # 截头
+        end = content.text.index("05")
+        try:
+            end1 = content.text[end:].index("\n\n\n") + end
+        except ValueError:
+            end1 = -1
+        finally:
+            result = content.text[start:end1]
+        for i in range(5):
+            start = result.index('0' + str(i + 1))
+            end = result[start:].index('\n') + start
+            title = result[start + 2:end]                   #标题要去掉开头的数字01，02，03，04，05
+            start = end + 1
+            end = result[start:].index('\n') + start
+            author = result[start:end]
+            start = end + 1
+            end = result[start:].index('\n') + start
+            start = end + 1
+            if i == 4:
+                end = -1
+            else:
+                end = result.index(str('0' + str(i + 2) + '《'))             #加书名号避免干扰数字出现
+            introduction = result[start:end]
+            print("title:", title,
+                  "author", author,
+                  "type:", booktype,
+                  "introduction:", introduction)
+            self._c.execute("insert into mainstorage (title, author, type, introduction) values(?,?,?,?)",
+                            [title, author, booktype, introduction])
+            print("是否添加到收藏夹？(yes/no)")
+            judge = input()
+            if judge == "yes":
+                self._c.execute("insert into favourite (title, author, type, introduction) values(?,?,?,?)",
+                                [title, author, booktype, introduction])
+            elif judge == "no":
+                pass
+            else:
+                print("invalid input(default no add to the favourite)")
+        browser.quit()
+
+    def check_resource(self, url):           #确认是否来源为书单来了，来源错误则无法执行解析与导入
+        browser = webdriver.Chrome()
+        try:
+            browser.get(url)
+        except InvalidArgumentException:
+            print("来源错误，请重新确认")
+            browser.quit()
+            self.ui()
+        try:
+            name = browser.find_element_by_id('profileBt')
+            if name.text == "书单来了":
+                print("来源正确")
+            else:
+                print("来源错误，请重新确认")
+                browser.quit()
+                self.ui()
+        except NoSuchElementException:
+            print("来源错误，请重新确认")
+            browser.quit()
+            self.ui()
 
     def check_connect(self):        #在线查找前先检测网络连接是否有效
         exit_code = os.system('ping www.baidu.com')
@@ -96,6 +183,7 @@ class Lib(object):
             start2 = i
             end2 = inf[start2:-1].index(' ') + start2
             print(inf[start2:end2])
+
         print("请输入想要查询的书目")
         title = input()
         browser = webdriver.Chrome()
@@ -188,7 +276,7 @@ class Lib(object):
             print("输入无效")
             self.ui()
 
-    def ui_print_read(self):
+    def print_read(self):
         result = self._c.execute("select * from read")
         for inf in result:
             print(" title :" + inf[0] + '\n',
@@ -198,7 +286,7 @@ class Lib(object):
                   )
         self.ui()
 
-    def ui_print_favourite(self):
+    def print_favourite(self):
         result = self._c.execute("select * from favourite")
         for inf in result:
             print(" title :" + inf[0] + '\n',
@@ -268,7 +356,7 @@ class Lib(object):
             print("输入无效")
             self.ui_insert_read()
 
-    def ui_delete(self):
+    def delete(self):
         print("请输入想要删除条目的title(输入0退出)")
         target = input()
         if target == '0':
@@ -291,7 +379,7 @@ class Lib(object):
                       "introduction :", inf[3], '\n')
                 judge = input()
                 if judge == "no":
-                    self.ui_delete()
+                    self.delete()
                 elif judge == "yes":
                     temp = self._c.execute("select * from mainstorage where title = ?", target)
                     for i in temp:
@@ -308,12 +396,12 @@ class Lib(object):
                     print("无效输入！！！")
                     self.ui()
 
-    def ui_insert(self):
+    def insert(self):
         print("请输入title（退出输入0）")        #sqlite中title为主键因此不能为空
         title = input()
         if title == '' or title[0] == ' ':
             print("title不能为空！！！")
-            self.ui_insert()
+            self.insert()
         elif title == '0':
             self.ui()
         else:
@@ -340,7 +428,7 @@ class Lib(object):
             print("无效输入")
             self.ui()
 
-    def ui_update(self):
+    def update(self):
         print("请输入需要更新信息的title(退出请输入0)")   #必须为准确的书名
         title = input()
         if title == '0':
@@ -350,7 +438,7 @@ class Lib(object):
         target = input()
         if target != "title" and target != "author" and target != "type" and target != "introduction":
             print("输入无效！")
-            self.ui_update()
+            self.update()
         print("请输入更新的内容")
         content = input()
         if target == "title":
@@ -361,7 +449,7 @@ class Lib(object):
             x = 1
         if x == 0:
             print("title is not in the storage，insert please")
-            self.ui_insert()
+            self.insert()
         elif x == 1:        #根据target的值来对相应的列做出update
             result = self._c.execute("select ? from mainstorage where title = ?", [target, title])
             for inf in result:
@@ -369,7 +457,7 @@ class Lib(object):
             judge = input()
             if judge == "no":
                 print("cancel the update,back to the main interface")
-                self.ui_update()
+                self.update()
             elif judge == "yes":
                 if target == "title":
                     self._c.execute("update mainstorage set title = ? where title = ?", [content, title])
@@ -383,7 +471,7 @@ class Lib(object):
                 self.ui()
             else:
                 print("输入无效！！！")
-                self.ui_update()
+                self.update()
 
     def ui_find(self):      #查找界面
         print("请输入要进行的操作序号：\n",
@@ -414,7 +502,7 @@ class Lib(object):
         result = self._c.execute("select * from mainstorage where title like ?", con)   #sqlite查询
         for i in result:        #sqlite如果返回为空，则i为0，将显示无此项并提供返回主界面的询问；如果不为空则进入显示结果
             x = 1
-        result_favour = self._c.execute("select * from mainstorage where title like ?", con)
+        result_favour = self._c.execute("select * from favourite where title like ?", con)
         y = 0
         for i in result_favour:
             y = 1
@@ -498,7 +586,7 @@ class Lib(object):
             else:
                 print(x[0], end="     ")
             i += 1
-        print("请输入想要查询的种类")
+        print("\n请输入想要查询的种类")
         con = ["%" + input() + "%"]  #将输入转为list
         result = self._c.execute("select title, author, type from mainstorage where type like ?", con)
         x = 0
