@@ -3,8 +3,10 @@ import sys
 import os
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, InvalidArgumentException
-#database中有mainstorage; recyclebin; favourite; read四个sheet分别存储主书库，回收站，收藏夹和已读;
-#均包含title, author, type, introduction;
+
+
+# database中有mainstorage; recyclebin; favourite; read四个sheet分别存储主书库，回收站，收藏夹和已读;
+# 均包含title, author, type, introduction;
 
 
 class Lib(object):
@@ -14,7 +16,7 @@ class Lib(object):
 
     def ui(self):
         print("输入任意字符开始")
-        input()                 #随意输入，起到暂停程序的作用
+        input()  # 随意输入，起到暂停程序的作用
         print("请输入要进行的操作序号：\n",
               "1、查询\n",
               "2、新建\n",
@@ -58,18 +60,18 @@ class Lib(object):
 
     def insert_online(self):
         self.check_connect()
-        print("请输入连接：（输入完后加一个空格，否则会直接打开网页）")             #暂时只能手动复制输入连接
+        print("请输入连接：（输入完后加一个空格，否则会直接打开网页）")  # 暂时只能手动复制输入连接
         url = input()
         self.check_resource(url)
         self.getpassage(url)
         print("导入结束")
         self.ui()
 
-    def getpassage(self, url):          #从给到的url获取有效信息并添加到主书库中
+    def getpassage(self, url):  # 从给到的url获取有效信息并添加到主书库中
         browser = webdriver.Chrome()
         browser.get(url)
         browser.minimize_window()
-        name = browser.find_element_by_id('activity-name')          #根据标题查找书目可能的类型
+        name = browser.find_element_by_id('activity-name')  # 根据标题查找书目可能的类型
         alltype = ["书信集", "传记", "医学", "历史", "哲学", "悬疑小说", "心理", "散文集", "文学", "法律", "游记", "社科",
                    "科学", "科幻小说", "纪实", "经济", "绘画绘本", "职场", "艺术", "计算机", "诗歌", "随笔", "小说"]
         for i in alltype:
@@ -78,7 +80,7 @@ class Lib(object):
                 break
             else:
                 booktype = ' '
-        content = browser.find_element_by_id("js_content")          #查找正文
+        content = browser.find_element_by_id("js_content")  # 查找正文
         start = content.text.index("01")  # 截头
         end = content.text.index("05")
         try:
@@ -90,7 +92,7 @@ class Lib(object):
         for i in range(5):
             start = result.index('0' + str(i + 1))
             end = result[start:].index('\n') + start
-            title = result[start + 2:end]                   #标题要去掉开头的数字01，02，03，04，05
+            title = result[start + 2:end]  # 标题要去掉开头的数字01，02，03，04，05
             start = end + 1
             end = result[start:].index('\n') + start
             author = result[start:end]
@@ -100,7 +102,7 @@ class Lib(object):
             if i == 4:
                 end = -1
             else:
-                end = result.index(str('0' + str(i + 2) + '《'))             #加书名号避免干扰数字出现
+                end = result.index(str('0' + str(i + 2) + '《'))  # 加书名号避免干扰数字出现
             introduction = result[start:end]
             print("title:", title,
                   "author", author,
@@ -119,7 +121,7 @@ class Lib(object):
                 print("invalid input(default no add to the favourite)")
         browser.quit()
 
-    def check_resource(self, url):           #确认是否来源为书单来了，来源错误则无法执行解析与导入
+    def check_resource(self, url):  # 确认是否来源为书单来了，来源错误则无法执行解析与导入
         browser = webdriver.Chrome()
         try:
             browser.get(url)
@@ -141,7 +143,7 @@ class Lib(object):
             browser.quit()
             self.ui()
 
-    def check_connect(self):        #在线查找前先检测网络连接是否有效
+    def check_connect(self):  # 在线查找前先检测网络连接是否有效
         exit_code = os.system('ping www.baidu.com')
         if exit_code:
             print('connect failed.'
@@ -164,24 +166,24 @@ class Lib(object):
             print("invalid input")
 
     def smu_search(self):
-        def get_vaild(inf):         #整理从网页爬取的相关信息
+        def get_vaild(inf):  # 整理从网页爬取的相关信息
             i = -1
-            while inf[i] == ' ' or 57 >= ord(inf[i]) >= 48:   #去除末尾两项无用数字项和空格
+            while inf[i] == ' ' or 57 >= ord(inf[i]) >= 48:  # 去除末尾两项无用数字项和空格
                 i -= 1
             inf = inf[0:i]
             end1 = inf.rindex(' ')
             start1 = inf[0:end1].rindex(' ') + 1
-            print(inf[start1:end1])         #显示位置
+            print(inf[start1:end1])  # 显示位置
             space1 = inf.index(' ')
             space2 = inf[space1 + 1:-1].index(' ') + space1 + 1
             space3 = inf[space2 + 2:-1].index(' ') + space2 + 2
             if space3 - space2 == 8:
-                print(inf[0:space2])        #显示存在空格的索书号
+                print(inf[0:space2])  # 显示存在空格的索书号
             else:
-                print(inf[0:space1])        #显示不存在空格的索书号
+                print(inf[0:space1])  # 显示不存在空格的索书号
             i = 0
             while inf[i] == ' ' or 57 >= ord(inf[i]) >= 45 or 65 <= ord(inf[i]) <= 90 or 97 <= ord(inf[i]) <= 122:
-                i += 1                      #显示是否在馆
+                i += 1  # 显示是否在馆
             start2 = i
             end2 = inf[start2:-1].index(' ') + start2
             print(inf[start2:end2])
@@ -391,7 +393,7 @@ class Lib(object):
                         bin3 = i[2]
                         bin4 = i[3]
                     self._c.execute("insert into recyclebin(title, author, type, introduction) \
-                                     values(?, ?, ?, ?)", [bin1, bin2, bin3, bin4])     #删除项将被放入recyclebin中
+                                     values(?, ?, ?, ?)", [bin1, bin2, bin3, bin4])  # 删除项将被放入recyclebin中
                     self._c.execute("delete from mainstorage where title = ?", target)
                     print("delete over,back to the main interface")
                     self.ui()
@@ -400,7 +402,7 @@ class Lib(object):
                     self.ui()
 
     def insert(self):
-        print("请输入title（退出输入0）")        #sqlite中title为主键因此不能为空
+        print("请输入title（退出输入0）")  # sqlite中title为主键因此不能为空
         title = input()
         if title == '' or title[0] == ' ':
             print("title不能为空！！！")
@@ -432,7 +434,7 @@ class Lib(object):
             self.ui()
 
     def update(self):
-        print("请输入需要更新信息的title(退出请输入0)")   #必须为准确的书名
+        print("请输入需要更新信息的title(退出请输入0)")  # 必须为准确的书名
         title = input()
         if title == '0':
             self.ui()
@@ -447,13 +449,13 @@ class Lib(object):
         if target == "title":
             content = "《" + content + "》"
         result = self._c.execute("select ? from mainstorage where title = ?", [target, title])
-        x = 0                   #查看输入的title是否存在于database中
+        x = 0  # 查看输入的title是否存在于database中
         for i in result:
             x = 1
         if x == 0:
             print("title is not in the storage，insert please")
             self.insert()
-        elif x == 1:        #根据target的值来对相应的列做出update
+        elif x == 1:  # 根据target的值来对相应的列做出update
             result = self._c.execute("select ? from mainstorage where title = ?", [target, title])
             for inf in result:
                 print("将" + title + "中的" + inf[0] + "改为" + content + "(yes/no)")
@@ -476,7 +478,7 @@ class Lib(object):
                 print("输入无效！！！")
                 self.update()
 
-    def ui_find(self):      #查找界面
+    def ui_find(self):  # 查找界面
         print("请输入要进行的操作序号：\n",
               "1：按书名查找\n",
               "2：按作者查找\n",
@@ -484,13 +486,13 @@ class Lib(object):
               "9：返回主界面\n",
               "0: 退出程序")
         num = input()
-        if num == '1':   #功能1按照书名查找
+        if num == '1':  # 功能1按照书名查找
             self.findbytitle()
-        elif num == '2':    #功能2按照作者查找
+        elif num == '2':  # 功能2按照作者查找
             self.findbyauthor()
-        elif num == '3':        #功能3按照类型查找
+        elif num == '3':  # 功能3按照类型查找
             self.findbytype()
-        elif num == '9':        #返回上一界面
+        elif num == '9':  # 返回上一界面
             self.ui()
         elif num == '0':
             sys.exit(0)
@@ -498,12 +500,12 @@ class Lib(object):
             print("useless input")
             self.ui_find()
 
-    def findbytitle(self):              #按照书名查找
+    def findbytitle(self):  # 按照书名查找
         print("input the title")
-        con = ["%" + input() + "%"]      #对输入加%后，转为模糊搜索格式
+        con = ["%" + input() + "%"]  # 对输入加%后，转为模糊搜索格式
         x = 0
-        result = self._c.execute("select * from mainstorage where title like ?", con)   #sqlite查询
-        for i in result:        #sqlite如果返回为空，则i为0，将显示无此项并提供返回主界面的询问；如果不为空则进入显示结果
+        result = self._c.execute("select * from mainstorage where title like ?", con)  # sqlite查询
+        for i in result:  # sqlite如果返回为空，则i为0，将显示无此项并提供返回主界面的询问；如果不为空则进入显示结果
             x = 1
         result_favour = self._c.execute("select * from favourite where title like ?", con)
         y = 0
@@ -529,7 +531,7 @@ class Lib(object):
                 print("invalid input")
                 self.ui()
         result = self._c.execute("select * from mainstorage where title like ?", con)
-        if x == 1:          #查询结果不为空，显示结果
+        if x == 1:  # 查询结果不为空，显示结果
             for inf in result:
                 print("title :" + inf[0] + '\n',
                       "author :" + inf[1] + '\n',
@@ -537,16 +539,16 @@ class Lib(object):
                       "introduction :" + inf[3] + '\n'
                       )
             self.ui_find()
-        else:       #查询结果为空，返回主界面
+        else:  # 查询结果为空，返回主界面
             print("no such title in the mainstorage \n back to the finding interface")
             self.ui_find()
 
     def findbyauthor(self):
         print("input the author")
-        con = ["%" + input() + "%"]     #将输入转为list
+        con = ["%" + input() + "%"]  # 将输入转为list
         result = self._c.execute("select title, author, type from mainstorage where author like ?", con)
         x = 0
-        for i in result:        #查询结果为空则为0，显示无此信息并询问是否返回主界面，否则为1，显示结果
+        for i in result:  # 查询结果为空则为0，显示无此信息并询问是否返回主界面，否则为1，显示结果
             x = 1
         result_favourite = self._c.execute("select title, author, type from favourite where author like ?", con)
         y = 0
@@ -556,8 +558,8 @@ class Lib(object):
         if y == 1:
             for inf in result_favourite:
                 print("title :", inf[0], '\n'
-                      "author :", inf[1], '\n'
-                      "type :", inf[2], '\n')
+                                         "author :", inf[1], '\n'
+                                                             "type :", inf[2], '\n')
             print("是否继续显示所有结果（yes/no）")
             judge = input()
             if judge == "no":
@@ -569,13 +571,13 @@ class Lib(object):
                 print("invalid input")
                 self.ui()
         result = self._c.execute("select title, author, type from mainstorage where author like ?", con)
-        if x == 1:              #查询结果不为空，循环显示所有结果
+        if x == 1:  # 查询结果不为空，循环显示所有结果
             for inf in result:
                 print("title :", inf[0], '\n'
-                      "author :", inf[1], '\n'
-                      "type :", inf[2], '\n')
+                                         "author :", inf[1], '\n'
+                                                             "type :", inf[2], '\n')
             self.ui_find()
-        else:           #查询结果为空，询问是否返回主界面
+        else:  # 查询结果为空，询问是否返回主界面
             print("no such author \n back to the finding interface")
             self.ui_find()
 
@@ -583,14 +585,14 @@ class Lib(object):
         alltype = self._c.execute("select type from mainstorage group by type having count(type) > 1")
         print("we have types like:")
         i = 0
-        for x in alltype:       #显示所有type
+        for x in alltype:  # 显示所有type
             if i % 5 == 0:
                 print(x[0])
             else:
                 print(x[0], end="     ")
             i += 1
         print("\n请输入想要查询的种类")
-        con = ["%" + input() + "%"]  #将输入转为list
+        con = ["%" + input() + "%"]  # 将输入转为list
         result = self._c.execute("select title, author, type from mainstorage where type like ?", con)
         x = 0
         for i in result:
@@ -603,8 +605,8 @@ class Lib(object):
         if y == 1:
             for inf in result_favourite:
                 print("title :", inf[0], '\n'
-                      "author :", inf[1], '\n'
-                      "type :", inf[2], '\n')
+                                         "author :", inf[1], '\n'
+                                                             "type :", inf[2], '\n')
             print("是否继续显示所有结果（yes/no）")
             judge = input()
             if judge == "no":
@@ -619,18 +621,19 @@ class Lib(object):
         if x == 1:
             for inf in result:
                 print("title :", inf[0], '\n'
-                      "author :", inf[1], '\n'
-                      "type :", inf[2], '\n')
+                                         "author :", inf[1], '\n'
+                                                             "type :", inf[2], '\n')
             self.ui_find()
         else:
             print("no such type \n back to the finding interface")
             self.ui_find()
 
 
-#connection = sqlite3.connect("eleclib.db")     #用with取代；暂时保留
-#test = Lib(connection)
-#test.ui()
+# connection = sqlite3.connect("eleclib.db")     #用with取代；暂时保留
+# test = Lib(connection)
+# test.ui()
 
-with sqlite3.connect("eleclib.db") as connection:
+"""with sqlite3.connect("eleclib.db") as connection:
     test = Lib(connection)
-    test.ui()
+    test.ui()"""
+

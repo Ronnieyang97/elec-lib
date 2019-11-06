@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>search</title>
+</head>
+<body>
+    <h1>This is the search interface</h1>
+    <h1>Please choose the way you to search by:</h1>
+    <p><a href="{{ url_for('search_by_title', _external=True) }}">search-by-title</a></p>
+    <p><a href="{{ url_for('search_by_author', _external=True) }}">search-by-author</a></p>
+    <p><a href="{{ url_for('search_by_type', _external=True) }}">search-by-type</a></p>
+    <p><a href="{{ url_for('main_gui', _external=True) }}">back</a></p>
+</body>
+</html>

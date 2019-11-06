@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>search_by_title</title>
+
+</head>
+<body>
+    {% extends "bootstrap/base.html" %}
+    {% import "bootstrap/wtf.html" as wtf %}
+
+    {% block content %}
+    <div class="container">
+        <div class="header">
+            <h1>please in put the title</h1>
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    {% if data != '' %}
+    <ul>
+        {% for i in data %}
+        <li>title : {{i[0]}}</li>
+        <li>author : {{i[1]}}</li>
+        <li>type : {{i[2]}}</li>
+        <li>introduction : {{i[3]}}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>no such title</p>
+    {% endif %}
+    {% endblock %}
+
+
+</body>
+</html>
