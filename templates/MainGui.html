@@ -7,7 +7,9 @@
 <body>
     <h1>Welcome to the online library!</h1>
     <h1>Please choose which service you need!</h1>
-    <p><a href="{{ url_for('search', _external=True) }}">search</a></p>
-
+    <p>
+        <a href="{{ url_for('search', _external=True) }}">search</a><br>
+        <a href="{{ url_for('update', _external=True) }}">update</a><br>
+    </p>
 </body>
 </html>

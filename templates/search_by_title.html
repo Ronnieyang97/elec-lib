@@ -10,6 +10,7 @@
     {% import "bootstrap/wtf.html" as wtf %}
 
     {% block content %}
+    <p><a href="{{url_for('search', _external=True)}}">home</a></p>
     <div class="container">
         <div class="header">
             <h1>please in put the title</h1>
@@ -17,16 +18,18 @@
         </div>
     </div>
     {% if data != '' %}
+    <h1>results in main storage</h1>
     <ul>
         {% for i in data %}
         <li>title : {{i[0]}}</li>
         <li>author : {{i[1]}}</li>
         <li>type : {{i[2]}}</li>
         <li>introduction : {{i[3]}}</li>
+        <li></li>
         {% endfor %}
     </ul>
     {% else %}
-    <p>no such title</p>
+    <h1>no such title</h1>
     {% endif %}
     {% endblock %}
 

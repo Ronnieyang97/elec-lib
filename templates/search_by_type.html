@@ -5,6 +5,56 @@
     <title>search_by_type</title>
 </head>
 <body>
+    {% extends "bootstrap/base.html" %}
+    {% import "bootstrap/wtf.html" as wtf %}
 
+    {% block content %}
+    <p><a href="{{url_for('search', _external=True)}}">home</a></p>
+    <div class="container">
+        <div class="header">
+            <h1>please in put the type</h1>
+            {{ wtf.quick_form(form) }}
+        </div>
+    <p>
+        <a href="{{ url_for('totype', thetype='书信集', _external=True)}}">书信集</a>
+        <a href="{{ url_for('totype', thetype='传记', _external=True)}}">传记</a>
+        <a href="{{ url_for('totype', thetype='医学', _external=True)}}">医学</a>
+        <a href="{{ url_for('totype', thetype='历史', _external=True)}}">历史</a>
+        <a href="{{ url_for('totype', thetype='哲学', _external=True)}}">哲学</a>
+        <a href="{{ url_for('totype', thetype='小说', _external=True)}}">小说</a>
+        <a href="{{ url_for('totype', thetype='心理', _external=True)}}">心理</a>
+        <a href="{{ url_for('totype', thetype='悬疑小说', _external=True)}}">悬疑小说</a>
+        <a href="{{ url_for('totype', thetype='散文集', _external=True)}}">散文集</a>
+        <a href="{{ url_for('totype', thetype='文学', _external=True)}}">文学</a>
+        <a href="{{ url_for('totype', thetype='法律', _external=True)}}">法律</a>
+        <a href="{{ url_for('totype', thetype='游记', _external=True)}}">游记</a>
+        <a href="{{ url_for('totype', thetype='社科', _external=True)}}">社科</a>
+        <a href="{{ url_for('totype', thetype='科学', _external=True)}}">科学</a>
+        <a href="{{ url_for('totype', thetype='科幻小说', _external=True)}}">科幻小说</a>
+        <a href="{{ url_for('totype', thetype='纪实', _external=True)}}">纪实</a>
+        <a href="{{ url_for('totype', thetype='经济', _external=True)}}">经济</a>
+        <a href="{{ url_for('totype', thetype='绘画绘本', _external=True)}}">绘画绘本</a>
+        <a href="{{ url_for('totype', thetype='职场', _external=True)}}">职场</a>
+        <a href="{{ url_for('totype', thetype='艺术', _external=True)}}">艺术</a>
+        <a href="{{ url_for('totype', thetype='计算机', _external=True)}}">计算机</a>
+        <a href="{{ url_for('totype', thetype='诗歌', _external=True)}}">诗歌</a>
+        <a href="{{ url_for('totype', thetype='随笔', _external=True)}}">随笔</a>
+    </p>
+    </div>
+    {% if data != '' %}
+    <h1>results in main storage</h1>
+    <ul>
+        {% for i in data %}
+        <li>title : {{i[0]}}</li>
+        <li>author : {{i[1]}}</li>
+        <li>type : {{i[2]}}</li>
+        <li>introduction : {{i[3]}}</li>
+        <li></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <h1>no such type</h1>
+    {% endif %}
+    {% endblock %}
 </body>
 </html>

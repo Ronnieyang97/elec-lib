@@ -5,6 +5,43 @@
     <title>search_by_author</title>
 </head>
 <body>
+    {% extends "bootstrap/base.html" %}
+    {% import "bootstrap/wtf.html" as wtf %}
+
+    {% block content %}
+    <p><a href="{{url_for('search', _external=True)}}">home</a></p>
+    <div class="container">
+        <div class="header">
+            <h1>please in put the author</h1>
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    {% if data_favour != '' %}
+    <h1>results in your favour storage</h1>
+    <ul>
+        {% for i in data_favour %}
+        <li>title : {{i[0]}}</li>
+        <li>author : {{i[1]}}</li>
+        <li>type : {{i[2]}}</li>
+        <li>introduction : {{i[3]}}</li>
+        <li></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if data != '' %}
+    <h1>results in main storage</h1>
+    <ul>
+        {% for i in data %}
+        <li>title : {{i[0]}}</li>
+        <li>author : {{i[1]}}</li>
+        <li>type : {{i[2]}}</li>
+        <li></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <h1>no such author</h1>
+    {% endif %}
+    {% endblock %}
 
 </body>
 </html>
